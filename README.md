@@ -14,4 +14,13 @@ tp5 命令行一键添加Model类字段属性注释，解决phpstorm等IDE没有
 php think insert_model_doc
 
 ###### 可选参数
-魂牵梦萦
+-a 应用目录  
+例如：php think insert_model_doc -a common 
+修改common目录下的所有模型 
+
+-m 模型名称
+例如：php think insert_model_doc -m User 
+修改所有应该目录下的User模型 
+
+php think insert_model_doc -a common -m User
+修改common目录下的User模型 
