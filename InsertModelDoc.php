@@ -26,6 +26,11 @@ class InsertModelDoc extends Command
             ->setDescription('批量插入模型类注释');
     }
 
+    /**
+     * @param Input $input
+     * @param Output $output
+     * @return int|void|null
+     */
     protected function execute(Input $input, Output $output)
     {
         $app = $input->getOption('app');
@@ -101,7 +106,7 @@ class InsertModelDoc extends Command
         }
         $output->info("共修改{$count}个文件");
     }
-    
+
     /**
      * @param $fields
      * @return array
@@ -128,6 +133,12 @@ class InsertModelDoc extends Command
         return $arr;
     }
 
+    /**
+     * @param $path
+     * @param array $names
+     * @param array $files
+     * @return array|false|mixed
+     */
     public static function getModelFiles($path, $names = [], &$files = [])
     {
         if (!is_dir($path)) {
