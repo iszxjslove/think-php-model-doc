@@ -34,59 +34,74 @@ class InsertModelDoc extends Command
         } else {
             $paths = glob(APP_PATH . '*');
         }
+        $count = 0;
         $models = $input->getOption('models');
         $models = $models ? explode(',', $models) : [];
         foreach ($paths as $path) {
             $modelPath = $path . '/model';
-            if (is_dir($path) && is_dir($modelPath)) {
-                $files = self::getModelFiles($modelPath, $models);
-                foreach ($files as $file) {
-                    $namespace = str_replace(rtrim(APP_PATH, DS), Config::get('app_namespace'), dirname($file));
-                    /* @var Model $class */
-                    $className = basename($file, '.php');
-                    $class = str_replace(DS, '\\', DS . $namespace . DS . $className);
-                    if (is_callable($class, 'getFieldsType')) {
-                        $tableName = $class::getTable();
-                        if ($tableName) {
-                            $fields = '';
-                            $class_doc = '';
-                            try {
-                                $reflection = new \ReflectionClass($class);
-                                $class_doc = $reflection->getDocComment();
-                                $fields = Db::query('SHOW FULL COLUMNS FROM ' . $class::getTable());
-                            } catch (\ReflectionException $e) {
-                            } catch (\Exception $e) {
-                            }
-                            if ($fields) {
-                                $fields_docs = self::parseType($fields);
-                                $file_content = file_get_contents($file);
-                                if ($class_doc) {
-                                    foreach ($fields_docs as $f => $doc) {
-                                        $class_doc = preg_replace("/^\s*?\*{1}\s*?@property.*?{$f}.*$/m", '  ', $class_doc);
-                                    }
-                                    $class_doc = preg_replace('/^\s*?(\/\*+|[*\s]+\/)\S*?/m', "", $class_doc);
-                                    $class_doc = str_replace(["\r\n", "\n", "\r"], "\n", $class_doc);
-                                    $class_doc = preg_replace("/^\s+$/m", implode("\r\n", $fields_docs), $class_doc);
-                                    $class_doc = array_filter(explode("\n", $class_doc));
-                                } else {
-                                    $class_doc = [
-                                        " * Class {$className}",
-                                        " * @package {$namespace}"
-                                    ];
-                                }
-                                $docs = array_merge(['/**'], $class_doc, $fields_docs, [' */']);
-                                $docs = "\r\n\r\n" . implode("\r\n", $docs) . "\r\nclass {$className}";
+            if (!is_dir($modelPath)) {
+                continue;
+            }
 
-                                $file_content = preg_replace("/(\s*\/\*{2}[\s\S]+?\*\/\s+)*?class\s+?{$className}/", $docs, $file_content);
-                                file_put_contents($file, $file_content);
-                            }
+            $files = self::getModelFiles($modelPath, $models);
+            if (!$files) {
+                continue;
+            }
+
+            foreach ($files as $file) {
+                $namespace = str_replace(rtrim(APP_PATH, DS), Config::get('app_namespace'), dirname($file));
+                /* @var Model $class */
+                $className = basename($file, '.php');
+                $class = str_replace(DS, '\\', DS . $namespace . DS . $className);
+                if (!is_callable($class, 'getFieldsType')) {
+                    continue;
+                }
+
+                $tableName = $class::getTable();
+                if (!$tableName) {
+                    continue;
+                }
+
+                $fields = '';
+                $class_doc = '';
+                try {
+                    $reflection = new \ReflectionClass($class);
+                    $class_doc = $reflection->getDocComment();
+                    $fields = Db::query('SHOW FULL COLUMNS FROM ' . $class::getTable());
+                } catch (\ReflectionException $e) {
+                } catch (\Exception $e) {
+                }
+                if ($fields) {
+                    $fields_docs = self::parseType($fields);
+                    if ($class_doc) {
+                        foreach ($fields_docs as $f => $doc) {
+                            $class_doc = preg_replace("/^\s*?\*{1}\s*?@property.*?{$f}.*$/m", '  ', $class_doc);
                         }
+                        $class_doc = preg_replace('/^\s*?(\/\*+|[*\s]+\/)\S*?/m', "", $class_doc);
+                        $class_doc = str_replace(["\r\n", "\n", "\r"], "\n", $class_doc);
+                        $class_doc = preg_replace("/^\s+$/m", implode("\r\n", $fields_docs), $class_doc);
+                        $class_doc = array_filter(explode("\n", $class_doc));
+                    } else {
+                        $class_doc = [
+                            " * Class {$className}",
+                            " * @package {$namespace}"
+                        ];
+                    }
+                    $docs = array_merge(['/**'], $class_doc, $fields_docs, [' */']);
+                    $docs = "\r\n\r\n" . implode("\r\n", $docs) . "\r\nclass {$className}";
+                    $file_content = file_get_contents($file);
+                    $new_content = preg_replace("/(\s*\/\*{2}[\s\S]+?\*\/\s+)*?class\s+?{$className}/", $docs, $file_content);
+                    if($new_content !== $file_content){
+                        file_put_contents($file, $new_content);
+                        $count++;
+                        $output->comment($file);
                     }
                 }
             }
         }
+        $output->info("共修改{$count}个文件");
     }
-
+    
     /**
      * @param $fields
      * @return array
@@ -115,27 +130,24 @@ class InsertModelDoc extends Command
 
     public static function getModelFiles($path, $names = [], &$files = [])
     {
-        if (is_dir($path)) {
-            //1、首先先读取文件夹
-            $temp = scandir($path);
-            //遍历文件夹
-            foreach ($temp as $v) {
-                //如果是文件夹则执行
-                if ($v === '.' || $v === '..') {
-                    //判断是否为系统隐藏的文件.和..  如果是则跳过否则就继续往下走，防止无限循环再这里。
-                    continue;
-                }
-                $filepath = $path . '/' . $v;
-                if (is_dir($filepath)) {
-                    self::getModelFiles($filepath, $names, $files);
-                } else {
-                    $name = basename($filepath, '.php');
-                    if ($names && !in_array($name, $names, true)) {
-                        continue;
-                    }
-                    $files[] = $filepath;
-                }
+        if (!is_dir($path)) {
+            return false;
+        }
+        $temp = scandir($path);
+        foreach ($temp as $v) {
+            if ($v === '.' || $v === '..') {
+                //判断是否为系统隐藏的文件.防止无限循环再这里。
+                continue;
             }
+            $filepath = $path . '/' . $v;
+            if (is_dir($filepath)) {
+                return self::getModelFiles($filepath, $names, $files);
+            }
+            $name = basename($filepath, '.php');
+            if ($names && !in_array($name, $names, true)) {
+                continue;
+            }
+            $files[] = $filepath;
         }
         return $files;
     }
