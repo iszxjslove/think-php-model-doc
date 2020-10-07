@@ -11,7 +11,7 @@ tp5 命令行一键添加Model类字段属性注释，解决phpstorm等IDE没有
 
 #### 使用说明
 
-~~~code \bin\bash
+~~~bash
 php think insert_model_doc
 ~~~
 
