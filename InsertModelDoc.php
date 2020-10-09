@@ -57,7 +57,7 @@ class InsertModelDoc extends Command
                 $namespace = str_replace(rtrim(APP_PATH, DS), Config::get('app_namespace'), dirname($file));
                 /* @var Model $class */
                 $className = basename($file, '.php');
-                $class = str_replace(DS, '\\', DS . $namespace . DS . $className);
+                $class = str_replace('/', '\\', DS . $namespace . DS . $className);
                 if (!is_callable($class, 'getFieldsType')) {
                     continue;
                 }
