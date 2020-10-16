@@ -1,0 +1,24 @@
+{
+  "name": "iszxjslove/think-php-model-doc",
+  "description": "tp5/tp6 命令行一键添加Model类字段属性注释，解决phpstorm等IDE没有提示的问题",
+  "type": "library",
+  "require": {
+    "php": "^7.2",
+    "ext-Reflection": "^7.2"
+  },
+  "authors": [
+    {
+      "name": "yufu",
+      "email": "228762287@qq.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "autoload": {
+    "files": [
+      "src/InsertModelDoc.php"
+    ],
+    "psr-4": {
+      "modelDoc\\": "src"
+    }
+  }
+}
