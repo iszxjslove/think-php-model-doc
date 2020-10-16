@@ -47,7 +47,7 @@ class InsertModelDoc extends Command
             $output->error('不是有效的目录');
             return false;
         }
-        $files = self::getFiles($path, $models);
+        $files = self::getFiles($path);
         if (!$files) {
             $output->error('没有找到模型文件，检查路径是否错误：' . $path);
             return false;
@@ -141,29 +141,19 @@ class InsertModelDoc extends Command
      * @param array $names
      * @return array
      */
-    public static function getFiles($path, $names = []): array
+    public static function getFiles($path): array
     {
         $files = [];
         if (is_dir($path)) {
-            $temp = scandir($path);
-            foreach ($temp as $v) {
-                if ($v === '.' || $v === '..') {
-                    //判断是否为系统隐藏的文件.防止无限循环再这里。
+            $files = array_merge($files, glob($path . '/*.php'));
+            foreach (glob($path . '/*') as $v) {
+                if (!is_dir($v)) {
                     continue;
                 }
-                $filepath = $path . '/' . $v;
-                if (is_dir($filepath)) {
-                    $list = self::getFiles($filepath, $names);
-                    foreach ($list as $item) {
-                        $files[] = $item;
-                    }
-                    continue;
+                $list = self::getFiles($v);
+                foreach ($list as $item) {
+                    $files[] = $item;
                 }
-                $name = basename($filepath, '.php');
-                if ($names && !in_array($name, $names, true)) {
-                    continue;
-                }
-                $files[] = $filepath;
             }
         }
         return $files;
@@ -180,18 +170,15 @@ class InsertModelDoc extends Command
             return false;
         }
         $content = file_get_contents($file);
-        preg_match('/namespace\s+(.+?);/', $content, $match);
-        if (!$match || !isset($match[1])) {
+        preg_match('/namespace\s+(.+?);.*?class\s+(.+?)\s+(extends\s+Model)/s', $content, $match);
+        if (!isset($match[1], $match[2]) || !$match) {
             return false;
         }
-        $className = basename($file, '.php');
-        $class = $match[1] . '\\' . $className;
-        $getFieldsType = [$class, 'getFieldsType'];
-        $getTable = [$class, 'getTable'];
-        if (!is_callable($getFieldsType) || !is_callable($getTable)) {
+        $class = '\\'.$match[1] . '\\' . $match[2];
+        if (!class_exists($class)) {
             return false;
         }
-        return ['namespace' => $match[1], 'name' => $className, 'class' => $class];
+        return ['namespace' => $match[1], 'name' => $match[2], 'class' => $class];
     }
 
     /**
