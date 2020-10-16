@@ -12,7 +12,7 @@
       "email": "228762287@qq.com"
     }
   ],
-  "minimum-stability": "dev",
+  "minimum-stability": "dev-master",
   "autoload": {
     "files": [
       "src/InsertModelDoc.php"
