@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="558c78f5-30b4-4445-b865-be0ae05e43b6" name="默认的" comment="">
-      <change beforePath="$PROJECT_DIR$/InsertModelDoc.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/InsertModelDoc.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/InsertModelDoc.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/InsertModelDoc.php" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,7 +46,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1602842322376</updated>
-      <workItem from="1602842323526" duration="444000" />
+      <workItem from="1602842323526" duration="888000" />
     </task>
     <servers />
   </component>
