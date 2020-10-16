@@ -1,7 +1,7 @@
 <?php
 declare (strict_types=1);
 
-namespace app\command;
+namespace doc;
 
 use think\console\Command;
 use think\console\Input;
@@ -10,7 +10,7 @@ use think\console\Output;
 
 /**
  * Class InsertModelDoc
- * @package app\command
+ * @package doc
  */
 class InsertModelDoc extends Command
 {
