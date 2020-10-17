@@ -6,6 +6,7 @@
     "php": "^7.2",
     "ext-Reflection": "^7.2"
   },
+  "license": "Apache",
   "authors": [
     {
       "name": "yufu",
