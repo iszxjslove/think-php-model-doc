@@ -4,7 +4,8 @@
   "type": "library",
   "require": {
     "php": "^7.0",
-    "ext-Reflection": "^7.2"
+    "ext-Reflection": "^7.2",
+    "topthink/framework": ">=5.0.24"
   },
   "license": "Apache-2.0",
   "authors": [
@@ -16,7 +17,7 @@
   "minimum-stability": "stable",
   "autoload": {
     "files": [
-      "src/InsertModelDoc.php"
+      "src/ModelDoc.php"
     ],
     "psr-4": {
       "modelDoc\\": "src"
