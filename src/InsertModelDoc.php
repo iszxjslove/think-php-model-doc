@@ -13,7 +13,7 @@ use think\console\Output;
  * Class InsertModelDoc
  * @package doc
  */
-class InsertModelDoc extends Command
+class ModelDoc extends Command
 {
     private $depth = 5;
 
@@ -102,7 +102,7 @@ class InsertModelDoc extends Command
                 if ($new_content !== $file_content) {
                     file_put_contents($file, $new_content);
                     $count++;
-                    $output->comment($file);
+                    $output->info($file);
                 }
             }
         }
@@ -171,12 +171,16 @@ class InsertModelDoc extends Command
             return false;
         }
         $content = file_get_contents($file);
-        preg_match('/namespace\s+(.+?);.*?class\s+(.+?)\s+(extends\s+Model)/s', $content, $match);
+        preg_match('/namespace\s+(.+?);.*?class\s+(.+?)\s+(extends)/s', $content, $match);
         if (!isset($match[1], $match[2]) || !$match) {
             return false;
         }
-        $class = '\\'.$match[1] . '\\' . $match[2];
+        $class = '\\' . $match[1] . '\\' . $match[2];
         if (!class_exists($class)) {
+            return false;
+        }
+        $callback = [$class, 'getTable'];
+        if (!is_callable($callback)) {
             return false;
         }
         return ['namespace' => $match[1], 'name' => $match[2], 'class' => $class];
