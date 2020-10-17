@@ -25,8 +25,8 @@ php think model_doc -p common
 ###### -m 模型名称
 ~~~bash
 # 修改所有应该目录下的User模型 
-php think insert_model_doc -m User 
+php think model_doc -m User 
 
 # 修改common目录下的User模型 
-php think insert_model_doc -p common -m User
+php think model_doc -p common -m User
 ~~~
