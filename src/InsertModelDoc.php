@@ -3,7 +3,6 @@ declare (strict_types=1);
 
 namespace modelDoc;
 
-
 use think\console\Command;
 use think\console\Input;
 use think\console\input\Option;
@@ -67,7 +66,7 @@ class ModelDoc extends Command
         $count = 0;
         foreach ($files as $file) {
             $modelClass = $this->getModelClass($file);
-            if (!$modelClass || !$tableName = $modelClass['class']::getTable()) {
+            if (!$modelClass ||  ($models && !in_array($modelClass['name'], $models, true)) || !$tableName = $modelClass['class']::getTable()) {
                 continue;
             }
             $fields = '';
@@ -181,6 +180,13 @@ class ModelDoc extends Command
         }
         $callback = [$class, 'getTable'];
         if (!is_callable($callback)) {
+            return false;
+        }
+        try {
+            if(!$class::getTable()){
+                return false;
+            }
+        }catch (\Exception $e){
             return false;
         }
         return ['namespace' => $match[1], 'name' => $match[2], 'class' => $class];

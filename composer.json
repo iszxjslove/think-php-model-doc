@@ -3,7 +3,7 @@
   "description": "tp5/tp6 命令行一键添加Model类字段属性注释，解决phpstorm等IDE没有提示的问题",
   "type": "library",
   "require": {
-    "php": "^7.2",
+    "php": "^7.0",
     "ext-Reflection": "^7.2"
   },
   "license": "Apache-2.0",
